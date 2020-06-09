@@ -1,0 +1,50 @@
+// 请求函数
+var runTime = [
+    "10:0:1",
+    "12:0:1",
+    "14:0:1",
+    "16:0:1",
+    "18:0:1",
+    "20:0:1",
+    "21:0:1",
+    "21:30:1"
+];
+let request = (functionId, body = {}) =>
+    fetch("https://api.m.jd.com/client.action", {
+        body: `functionId=${functionId}&body=${JSON.stringify(
+            body
+        )}&client=wh5&clientVersion=1.0.0`,
+        headers: {
+            "content-type": "application/x-www-form-urlencoded",
+        },
+        method: "POST",
+        credentials: "include",
+    });
+let func = function () {
+    console.log("💡 正在执行抢炸弹任务");
+// 战队抢炸弹，感谢 @elevenDimension 提供 functionId
+    request("cakebaker_pk_getCakeBomb");
+};
+let config = {
+    interval: 1, //间隔天数，间隔为整数
+    runNow: false, //是否立即运行
+    time: "0:0:0" //执行的时间点 时在0~23之间
+};
+let date = new Date();//现在时刻
+function timeoutFunc(config, func) {
+    config.runNow && func()
+    let nowTime = new Date().getTime()
+    let timePoints = config.time.split(':').map(i => parseInt(i))
+    let recent = new Date().setHours(...timePoints)
+    recent >= nowTime || (recent += 24 * 3600000)
+    setTimeout(() => {
+        func()
+        setInterval(func, config.interval * 3600000)
+    }, recent - nowTime)
+}
+runTime.forEach(function (item) {
+    config.time = item;
+    console.log(item);
+    timeoutFunc(config, func);
+});
+
